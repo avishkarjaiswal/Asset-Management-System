@@ -257,18 +257,7 @@ export default function Header({ onToggleSidebar, onOpenMobileSidebar }) {
   const navigate = useNavigate()
 
   return (
-    <header style={{
-      position: 'fixed',
-      top: 0, right: 0, left: 'var(--sidebar-width)',
-      height: 'var(--header-height)',
-      background: 'var(--bg-surface)',
-      borderBottom: '1px solid var(--border-subtle)',
-      display: 'flex', alignItems: 'center', gap: 12,
-      padding: '0 20px',
-      zIndex: 200,
-      boxShadow: 'var(--shadow-sm)',
-      transition: 'left 0.3s ease',
-    }}>
+    <header className="app-header">
       <style>{`
         :root { --z-sticky: 200; }
         @keyframes spin { to { transform: rotate(360deg); } }
@@ -290,7 +279,10 @@ export default function Header({ onToggleSidebar, onOpenMobileSidebar }) {
       `}</style>
 
       {/* Sidebar toggle */}
-      <button className="header-btn" onClick={onToggleSidebar} title="Toggle Sidebar">
+      <button className="header-btn" onClick={() => {
+        if (window.innerWidth <= 768) onOpenMobileSidebar()
+        else onToggleSidebar()
+      }} title="Toggle Sidebar">
         <Menu size={20} />
       </button>
 
@@ -341,11 +333,11 @@ export default function Header({ onToggleSidebar, onOpenMobileSidebar }) {
           }}>
             {user?.first_name?.[0]}{user?.last_name?.[0]}
           </div>
-          <div style={{ textAlign: 'left' }}>
+          <div className="desktop-only" style={{ textAlign: 'left' }}>
             <div style={{ fontSize: '0.8125rem', fontWeight: 600 }}>{user?.first_name}</div>
             <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{user?.role?.display_name}</div>
           </div>
-          <ChevronDown size={14} style={{ color: 'var(--text-muted)' }} />
+          <ChevronDown size={14} className="desktop-only" style={{ color: 'var(--text-muted)' }} />
         </button>
 
         {userMenuOpen && (

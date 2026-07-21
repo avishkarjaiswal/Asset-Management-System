@@ -118,19 +118,7 @@ export default function Sidebar({ collapsed, mobileOpen, onClose }) {
   })
 
   return (
-    <aside
-      style={{
-        position: 'fixed', top: 0, left: 0, bottom: 0,
-        width: collapsed ? 'var(--sidebar-collapsed)' : 'var(--sidebar-width)',
-        background: 'var(--bg-sidebar)',
-        borderRight: '1px solid rgba(255,255,255,0.06)',
-        display: 'flex', flexDirection: 'column',
-        transition: 'width 0.3s cubic-bezier(0.4,0,0.2,1)',
-        zIndex: 240,
-        overflowX: 'hidden',
-        overflowY: 'auto',
-      }}
-    >
+    <aside className={`app-sidebar ${collapsed ? 'collapsed' : ''} ${mobileOpen ? 'mobile-open' : ''}`}>
       {/* Logo */}
       <div style={{
         height: 'var(--header-height)',

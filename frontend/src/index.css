@@ -798,16 +798,74 @@ select.form-control { cursor: pointer; }
   gap: 20px;
 }
 
+/* ── Layout Classes (replacing inline styles) ── */
+.app-header {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: var(--sidebar-width);
+  height: var(--header-height);
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 20px;
+  z-index: var(--z-sticky);
+  box-shadow: var(--shadow-sm);
+  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.main-content.sidebar-collapsed .app-header {
+  left: var(--sidebar-collapsed);
+}
+
+.app-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: var(--sidebar-width);
+  background: var(--bg-sidebar);
+  border-right: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 260;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.app-sidebar.collapsed {
+  width: var(--sidebar-collapsed);
+}
+
 /* ── Responsive ── */
 @media (max-width: 1200px) {
   .grid-cols-4 { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 768px) {
-  :root { --sidebar-width: 0px; }
-  .main-content { margin-left: 0; }
+  .app-sidebar {
+    transform: translateX(-100%);
+    width: var(--sidebar-width) !important; /* Fixed width on mobile */
+  }
+  .app-sidebar.mobile-open {
+    transform: translateX(0);
+  }
+  
+  .app-header {
+    left: 0 !important;
+  }
+  
+  .main-content {
+    margin-left: 0 !important;
+  }
+  
+  .desktop-only { display: none !important; }
+  
   .grid-cols-2, .grid-cols-3, .grid-cols-4 { grid-template-columns: 1fr; }
-  .page-container { padding: 16px; }
+  .page-container { padding: 16px; margin-top: calc(var(--header-height) + 10px); }
   .stat-grid { grid-template-columns: repeat(2, 1fr); }
   .data-table th:nth-child(n+4), .data-table td:nth-child(n+4) { display: none; }
 }
@@ -815,3 +873,4 @@ select.form-control { cursor: pointer; }
 @media (max-width: 480px) {
   .stat-grid { grid-template-columns: 1fr; }
 }
+
