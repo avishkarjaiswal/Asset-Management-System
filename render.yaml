@@ -1,0 +1,36 @@
+services:
+  - type: web
+    name: asset-management-backend
+    env: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn "app:create_app()"
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: PYTHON_VERSION
+        value: 3.10.0
+      # Change these values in the Render dashboard for production!
+      - key: SECRET_KEY
+        generateValue: true
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: CORS_ORIGINS
+        # This will be updated to the frontend URL dynamically by Render using a dummy value here initially, or better yet, cross-referencing.
+        value: "*" # Set to the frontend URL later for better security
+      - key: DATABASE_URL
+        # On free tier, SQLite will be lost on restart. Consider adding a PostgreSQL database on Render.
+        value: sqlite:///gppl_eams.db
+
+  - type: web
+    name: asset-management-frontend
+    env: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: asset-management-backend
+          envVarKey: RENDER_EXTERNAL_URL
