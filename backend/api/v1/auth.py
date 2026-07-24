@@ -79,9 +79,39 @@ def login():
     super_admin_pass = os.getenv('SUPER_ADMIN_PASSWORD')
 
     if super_admin_login and login_field == super_admin_login and password == super_admin_pass:
-        user = User.query.filter_by(email='admin@gppl.in').first()
+        from models.user import Role
+        super_admin_role = Role.query.filter_by(name='super_admin').first()
+        if not super_admin_role:
+            return jsonify({'error': 'Super admin role not found in the system'}), 500
+            
+        user = User.query.filter_by(email=super_admin_login).first()
+        
         if not user:
-            return jsonify({'error': 'Super admin DB user not found'}), 500
+            user = User(
+                first_name='Super',
+                last_name='Admin',
+                email=super_admin_login,
+                role_id=super_admin_role.id,
+                is_active=True,
+                is_approved=True,
+                is_email_verified=True
+            )
+            user.set_password(super_admin_pass)
+            db.session.add(user)
+            db.session.commit()
+        else:
+            needs_commit = False
+            if user.role_id != super_admin_role.id:
+                user.role_id = super_admin_role.id
+                needs_commit = True
+            if not user.is_active:
+                user.is_active = True
+                needs_commit = True
+            if not user.is_approved:
+                user.is_approved = True
+                needs_commit = True
+            if needs_commit:
+                db.session.commit()
     else:
         # Find user by email or employee_id
         user = User.query.filter(
