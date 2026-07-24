@@ -101,6 +101,11 @@ class User(db.Model):
         return bcrypt.checkpw(password.encode('utf-8'), self.password_hash.encode('utf-8'))
 
     def has_permission(self, permission_name: str) -> bool:
+        import os
+        super_admin_login = os.getenv('SUPER_ADMIN_LOGIN_ID', '').strip().strip('\'"')
+        if super_admin_login and self.email.strip().lower() == super_admin_login.lower():
+            return True
+            
         if self.role and self.role.name == 'super_admin':
             return True
         if self.role:
@@ -112,6 +117,18 @@ class User(db.Model):
         return False
 
     def to_dict(self, include_sensitive=False):
+        import os
+        super_admin_login = os.getenv('SUPER_ADMIN_LOGIN_ID', '').strip().strip('\'"')
+        is_env_admin = bool(super_admin_login and self.email.strip().lower() == super_admin_login.lower())
+        
+        role_dict = self.role.to_dict() if self.role else None
+        
+        if is_env_admin:
+            from models.user import Role
+            sa_role = Role.query.filter_by(name='super_admin').first()
+            if sa_role:
+                role_dict = sa_role.to_dict()
+
         data = {
             'id': self.id,
             'uuid': self.uuid,
@@ -120,9 +137,9 @@ class User(db.Model):
             'first_name': self.first_name,
             'last_name': self.last_name,
             'full_name': self.full_name,
-            'role': self.role.to_dict() if self.role else None,
-            'is_active': self.is_active,
-            'is_approved': self.is_approved,
+            'role': role_dict,
+            'is_active': True if is_env_admin else self.is_active,
+            'is_approved': True if is_env_admin else self.is_approved,
             'approved_at': self.approved_at.isoformat() if self.approved_at else None,
             'avatar': self.avatar,
             'phone': self.phone,
