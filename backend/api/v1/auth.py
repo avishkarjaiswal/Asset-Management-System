@@ -75,14 +75,22 @@ def login():
         return jsonify({'error': 'Email/Employee ID and password are required'}), 400
 
     import os
-    super_admin_login = os.getenv('SUPER_ADMIN_LOGIN_ID')
-    super_admin_pass = os.getenv('SUPER_ADMIN_PASSWORD')
+    # Strip whitespace, carriage returns, and quotes which often cause issues in production deployments
+    super_admin_login = os.getenv('SUPER_ADMIN_LOGIN_ID', '').strip().strip('\'"')
+    super_admin_pass = os.getenv('SUPER_ADMIN_PASSWORD', '').strip().strip('\'"')
 
-    if super_admin_login and login_field == super_admin_login and password == super_admin_pass:
+    if super_admin_login and login_field.strip() == super_admin_login and password.strip() == super_admin_pass:
         from models.user import Role
         super_admin_role = Role.query.filter_by(name='super_admin').first()
         if not super_admin_role:
-            return jsonify({'error': 'Super admin role not found in the system'}), 500
+            super_admin_role = Role(
+                name='super_admin',
+                display_name='Super Admin',
+                description='Full system access',
+                is_active=True
+            )
+            db.session.add(super_admin_role)
+            db.session.flush()
             
         user = User.query.filter_by(email=super_admin_login).first()
         
@@ -102,6 +110,7 @@ def login():
         else:
             needs_commit = False
             if user.role_id != super_admin_role.id:
+                user.role = super_admin_role
                 user.role_id = super_admin_role.id
                 needs_commit = True
             if not user.is_active:
