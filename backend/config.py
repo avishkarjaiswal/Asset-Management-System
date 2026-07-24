@@ -6,7 +6,8 @@ import os
 from datetime import timedelta
 from dotenv import load_dotenv
 
-load_dotenv()
+# override=True ensures that values in .env always take precedence over system environment variables
+load_dotenv(override=True)
 
 # Detect whether the configured DB is SQLite
 _db_url = os.environ.get('DATABASE_URL', 'sqlite:///gppl_eams.db')

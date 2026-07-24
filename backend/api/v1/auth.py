@@ -79,7 +79,13 @@ def login():
     super_admin_login = os.getenv('SUPER_ADMIN_LOGIN_ID', '').strip().strip('\'"')
     super_admin_pass = os.getenv('SUPER_ADMIN_PASSWORD', '').strip().strip('\'"')
 
-    if super_admin_login and login_field.strip() == super_admin_login and password.strip() == super_admin_pass:
+    is_super_admin_email = bool(super_admin_login and login_field.strip().lower() == super_admin_login.lower())
+
+    if is_super_admin_email:
+        if password.strip() != super_admin_pass:
+            log_action('login', 'auth', f'Failed super admin login attempt for {login_field}', status='failed')
+            return jsonify({'error': 'Invalid credentials'}), 401
+            
         from models.user import Role
         super_admin_role = Role.query.filter_by(name='super_admin').first()
         if not super_admin_role:
